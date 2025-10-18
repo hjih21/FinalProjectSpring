@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 반드시 인터페이스 FQCN과 동일해야 함 -->
+<mapper namespace="practical.llm.user.mapper.UserMapper">
+
+    <!-- user INSERT (useGeneratedKeys 로 userId 채움) -->
+    <insert id="insert" parameterType="practical.llm.user.domain.User" useGeneratedKeys="true" keyProperty="userId">
+        INSERT INTO tb_user (user_email, user_pw, user_name, user_birth)
+        VALUES (#{userEmail}, #{userPw}, #{userName}, #{userBirth})
+    </insert>
+
+    <!-- 이메일로 단건 조회 -->
+    <select id="findByEmail" parameterType="string" resultType="practical.llm.user.domain.User">
+        SELECT user_id, user_email, user_pw, user_name, user_birth, created_at
+        FROM tb_user
+        WHERE user_email = #{email}
+    </select>
+
+    <!-- PK로 단건 조회 -->
+    <select id="findById" parameterType="long" resultType="practical.llm.user.domain.User">
+        SELECT user_id, user_email, user_pw, user_name, user_birth, created_at
+        FROM tb_user
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 이름/생일 업데이트 -->
+    <update id="updateProfile">
+        UPDATE tb_user
+        SET user_name = #{userName},
+            user_birth = #{userBirth}
+        WHERE user_id = #{userId}
+    </update>
+
+</mapper>

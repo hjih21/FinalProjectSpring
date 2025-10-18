@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="practical.llm.file.mapper.DocumentMapper">
+
+    <insert id="insert"
+            parameterType="practical.llm.file.domain.DocumentFile"
+            useGeneratedKeys="true"
+            keyProperty="documentId"
+            keyColumn="document_id">
+        INSERT INTO tb_document (user_id, document_title, mime_type, storage_uri,
+                                 size_bytes, sha256, `status`, meta)
+        VALUES (#{userId}, #{documentTitle}, #{mimeType}, #{storageUri},
+                #{sizeBytes}, #{sha256}, #{status}, COALESCE(#{meta}, '{}')) AS new
+        ON DUPLICATE KEY
+        UPDATE
+            document_id = LAST_INSERT_ID(document_id),
+            document_title = new.document_title,
+            mime_type = new.mime_type,
+            storage_uri = new.storage_uri,
+            size_bytes = new.size_bytes,
+            `status` = new.`status`,
+            meta = COALESCE(new.meta, tb_document.meta)
+    </insert>
+
+    <select id="findById" resultType="practical.llm.file.domain.DocumentFile">
+        SELECT * FROM tb_document WHERE document_id = #{documentId}
+    </select>
+
+    <select id="findByUserId" resultType="practical.llm.file.domain.DocumentFile">
+        SELECT * FROM tb_document
+        WHERE user_id = #{userId}
+        ORDER BY document_id DESC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE tb_document SET status = #{status}
+        WHERE document_id = #{documentId}
+    </update>
+
+
+
+    <select id="findLatestIdByUserId" resultType="long">
+        SELECT document_id
+        FROM tb_document
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC, document_id DESC
+            LIMIT 1
+    </select>
+
+</mapper>
