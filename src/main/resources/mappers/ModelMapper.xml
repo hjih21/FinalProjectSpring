@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="practical.llm.model.mapper.ModelMapper">
+
+    <resultMap id="EvalModelMap" type="practical.llm.model.domain.Models">
+        <id     property="modelId"   column="model_id"/>
+        <result property="name"      column="name"/>
+        <result property="provider"  column="provider"/>
+        <result property="modelKey"  column="model_key"/>
+        <result property="modelRole" column="model_role"/>
+        <result property="params"    column="params"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 평가용 모델만 -->
+    <select id="findEvaluationModels" resultMap="EvalModelMap">
+        SELECT model_id, name, provider, model_key, model_role, params, created_at
+        FROM tb_model
+        WHERE model_role = 'EVALUATION'
+        ORDER BY model_id ASC
+    </select>
+
+</mapper>

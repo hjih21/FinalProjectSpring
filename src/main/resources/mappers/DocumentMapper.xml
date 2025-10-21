@@ -4,6 +4,18 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="practical.llm.file.mapper.DocumentMapper">
 
+    <!--
+      DocumentMapper: tb_document 테이블에 대한 MyBatis 매퍼
+      - insert: 해시(sha256) 중복 시 UPSERT로 동작
+      - findById / findByUserId: 조회
+      - updateStatus: 상태 업데이트
+      - findLatestIdByUserId: 사용자의 가장 최근 문서 ID
+    -->
+    <!--
+      INSERT (UPSERT 동작)
+      - sha256 UNIQUE 제약을 활용하여 이미 존재하면 기존 행의 document_id를 유지하고 필드를 갱신
+      - COALESCE(meta, '{}')로 meta NULL 방지
+    -->
     <insert id="insert"
             parameterType="practical.llm.file.domain.DocumentFile"
             useGeneratedKeys="true"
@@ -24,16 +36,19 @@
             meta = COALESCE(new.meta, tb_document.meta)
     </insert>
 
+    <!-- 문서 PK로 단건 조회 -->
     <select id="findById" resultType="practical.llm.file.domain.DocumentFile">
         SELECT * FROM tb_document WHERE document_id = #{documentId}
     </select>
 
+    <!-- 사용자 ID 기준 내림차순 목록 조회 -->
     <select id="findByUserId" resultType="practical.llm.file.domain.DocumentFile">
         SELECT * FROM tb_document
         WHERE user_id = #{userId}
         ORDER BY document_id DESC
     </select>
 
+    <!-- 상태 필드만 변경 -->
     <update id="updateStatus">
         UPDATE tb_document SET status = #{status}
         WHERE document_id = #{documentId}

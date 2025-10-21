@@ -11,6 +11,10 @@ import practical.llm.user.dto.UpdateProfileRequest;
 import practical.llm.user.service.UserService;
 import practical.llm.user.web.LoginCheckInterceptor;
 
+/**
+ * 사용자 관련 요청을 처리하는 컨트롤러
+ * 프로필 수정 등 회원정보 관련 API 제공
+ */
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -18,6 +22,12 @@ public class UserController {
 
     private final UserService userService;
 
+
+    /**
+     * PK(userId)로 사용자 정보를 조회합니다.
+     * @param userId 사용자 PK
+     * @return User 객체 또는 null
+     */
     @PutMapping("/update")
     public String updateProfile(@RequestBody UpdateProfileRequest updateProfileRequest, HttpServletRequest request) {
         HttpSession session = request.getSession(false);

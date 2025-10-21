@@ -22,6 +22,12 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * 파일 저장/메타 생성/DB 기록을 담당하는 서비스
+ * - 물리 파일을 로컬 디스크에 저장
+ * - 해시/용량/MIME 등 메타 생성
+ * - tb_document에 UPSET
+ * */
 @Service
 @RequiredArgsConstructor
 public class FileService {
@@ -31,11 +37,12 @@ public class FileService {
     @Value("${file.dir}")
     private String baseDir;
 
+    // 1) 유효성 검사
     public FileUploadResponse upload(Long userId, String title, String metaJson, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("업로드할 파일이 없습니다");
         }
-        // 저장 경로: baseDir/userId/yyyy/MM/dd/UUID.확장자
+        // 2) 저장 결로 준비: baseDir/userId/ 에 UUID 파일명으로 저장
         String originalName = StringUtils.cleanPath(file.getOriginalFilename());
         String ext = getExtension(originalName);
 
@@ -44,23 +51,19 @@ public class FileService {
         Files.createDirectories(userDir);
 
         String fileName = UUID.randomUUID().toString() + "." + ext;
-        Path fullPath = userDir.resolve(fileName); //'/Users/jihyunhong/projectFileTest/123/abcd-uuid.pdf'
+        Path fullPath = userDir.resolve(fileName);
 
-        // 로컬 저장소에 저장
-        // MultipartFile file은 임시로 파일을 담고 있음
-        // getInputStream() -> 담은 파일을 읽기 위한 스트림
-        // Files.copy -> 스트림 내용을 복사 in내용을 fullPath경로로 복사
-        // StandardCopyOption.REPLACE_EXISTING -> 같은 이름이 있으면 덮어쓰기
+        // 3) 실제 파일 저장 (임시 업로드 스트림 -> 최종 결로로 복사)
         try (InputStream in = file.getInputStream()) {
             Files.copy(in, fullPath, StandardCopyOption.REPLACE_EXISTING);
         }
 
-        // 메타정보
+        // 4) 메타 생성: 파일 크기, MIME, SHA-256 해시
         long size = Files.size(fullPath);
         String mime = Files.probeContentType(fullPath);
         String sha256 = sha256Hex(fullPath);
 
-        // DB 레코드 생성
+        // 5) DB 기록을 위한 도메인 객체 구성
         DocumentFile doc = DocumentFile.builder()
                 .userId(userId)
                 .documentTitle(title != null && !title.isBlank() ? title : originalName)
@@ -72,9 +75,10 @@ public class FileService {
                 .meta(metaJson)
                 .build();
 
+        // 6) DB UPSERT를 실행 (중복 sha256이면 기존 행 갱신)
         documentMapper.insert(doc);
 
-        // Controller에게 응답 데이터를 반환
+        // 7) 컨트롤러 응답 DTO 반환
         return new FileUploadResponse(
                 doc.getDocumentId(),
                 doc.getDocumentTitle(),
@@ -97,6 +101,7 @@ public class FileService {
 
     // 파일 경로 반환 (다운로드용)
     public Path resolvePath(DocumentFile doc){
+        // 저장된 storageUri(절대/성대 경로)를 그대로 Path로 변환
         return Paths.get(doc.getStorageUri());
     }
 
@@ -104,13 +109,14 @@ public class FileService {
         return documentMapper.updateStatus(documentId, status);
     }
 // ========================================================================================================
-
+    // 파일명에서 확장자만 추출
     private static String getExtension(String originalName) {
         if (originalName == null) return "";
         int i = originalName.lastIndexOf('.');
         return (i == -1) ? "" : originalName.substring(i + 1);
     }
 
+    // 파일 내용을 스트리밍하여 SHA-256 해시를 계산하여 Hex 문자열로 반환
     private static String sha256Hex(Path path) throws IOException {
         try (InputStream in = Files.newInputStream(path)){
             MessageDigest md = MessageDigest.getInstance("SHA-256");
