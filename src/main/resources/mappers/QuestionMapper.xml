@@ -15,20 +15,28 @@
     </resultMap>
 
     <!--
-        대량 INSERT
-        - 워커에서 전달된 질문 목록을 INSERT
-        - question_text 컬럼은 JSON 문자열을 기대하므로 Service에서 미리 '텍스트' 형태로 직렬화하여 전달
+        단건 INSERT (문서당 1행)
+        - question_text 컬럼에는 질문 JSON 배열(문자열) 저장
+        - Service/Controller 에서 JSON 문자열로 직렬화하여 넘겨주세요.
     -->
-    <insert id="insertBatch">
+    <insert id="insertOne" parameterType="practical.llm.question.domain.Question">
         INSERT INTO tb_question
         (user_id, document_id, question_text, lang, gen_prompt_text, gen_prompt_params)
         VALUES
-        /* 각 아이템을 쉼표로 구분하여 다중 VALUES 구문으로 삽입 */
-        <foreach collection="list" item="q" separator=",">
-            (#{q.userId}, #{q.documentId}, #{q.questionText}, #{q.lang},
-            #{q.genPromptText}, #{q.genPromptParams})
-        </foreach>
+        (#{userId}, #{documentId}, #{questionText}, #{lang}, #{genPromptText}, #{genPromptParams})
     </insert>
+
+    <!-- userId + documentId 로 최근 1건 조회 (문서당 1행 구조) -->
+    <select id="findOneByUserAndDocument" resultMap="QuestionMap">
+        SELECT
+            question_id, user_id, document_id, question_text, lang,
+            gen_prompt_text, gen_prompt_params, created_at
+        FROM tb_question
+        WHERE user_id = #{userId}
+          AND document_id = #{documentId}
+        ORDER BY question_id DESC
+            LIMIT 1
+    </select>
     <!-- 문서 ID 기준 최신순 조회 -->
     <select id="findByDocumentId" resultMap="QuestionMap">
         SELECT * FROM tb_question

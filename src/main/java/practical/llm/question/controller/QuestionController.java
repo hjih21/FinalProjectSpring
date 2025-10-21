@@ -39,6 +39,13 @@ public class QuestionController {
         return questionService.getByUserId(userId);
     }
 
+    @GetMapping("/flat")
+    public List<String> flat(@RequestParam Long documentId, HttpServletRequest request) {
+        Long userId = (Long) request.getSession(false)
+                .getAttribute(LoginCheckInterceptor.LOGIN_USER);
+        return questionService.getFlatQuestions(userId, documentId); // 정확한 이름
+    }
+
 
 
 }

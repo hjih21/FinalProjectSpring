@@ -13,13 +13,8 @@ public class WorkerQuestionCreateRequest {
     private String lang;           // "ko"/"en" 등
     private String genPromptText;  // 선택
     private Map<String, Object> genPromptParams;// Map/JsonNode → Jackson이 문자열로 직렬화 가능
-    private List<QuestionItem> questions;// 생성된 질문 텍스트 배열
+    // [{"Q1":"..."}, {"Q2":"..."}]
+    private List<Map<String, String>> questions;
     private String token;
 
-    @Data
-    public static class QuestionItem {
-        private String text;
-        private String type;
-        private Map<String, Object> meta;
-    }
 }
