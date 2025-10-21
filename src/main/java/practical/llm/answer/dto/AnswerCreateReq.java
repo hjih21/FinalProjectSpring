@@ -1,7 +1,7 @@
 package practical.llm.answer.dto;
 
 public record AnswerCreateReq(
-        Long questionId,
+        Long documentId,
         String answerText
 ) {
 }

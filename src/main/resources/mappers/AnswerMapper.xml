@@ -18,4 +18,12 @@
             )
     </insert>
 
+    <select id="findLatestQuestionIdByDocumentId" resultType="long">
+        SELECT q.question_id
+        FROM tb_question q
+        WHERE q.document_id = #{documentId}
+        ORDER BY q.created_at DESC
+            LIMIT 1
+    </select>
+
 </mapper>

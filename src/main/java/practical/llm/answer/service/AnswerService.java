@@ -20,12 +20,18 @@ public class AnswerService {
     @Transactional
     public Long save(AnswerCreateReq req) {
         Answer a = new Answer();
-        a.setQuestionId(req.questionId());
 
-        // ✨ 여러 줄 텍스트를 [{"A1":"..."},{"A2":"..."}] JSON 문자열로 변환
+        // ✅ documentId로 최신 question_id 해석
+        Long questionId = answerMapper.findLatestQuestionIdByDocumentId(req.documentId());
+        if (questionId == null) {
+            throw new IllegalStateException("documentId=" + req.documentId() + " 에 대한 질문을 찾을 수 없습니다.");
+        }
+        a.setQuestionId(questionId);
+
+        // 여러 줄을 [{"A1":"..."},...] JSON 문자열로 변환 (기존 그대로)
         a.setAnswerText(toAnswerJsonArray(req.answerText()));
 
-        answerMapper.insertAnswer(a);   // a.answerId 가 채워짐
+        answerMapper.insertAnswer(a);
         return a.getAnswerId();
     }
 

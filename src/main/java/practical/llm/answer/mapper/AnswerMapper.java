@@ -8,4 +8,6 @@ import practical.llm.answer.domain.Answer;
 public interface AnswerMapper {
 
     int insertAnswer(@Param("a") Answer answer);
+
+    Long findLatestQuestionIdByDocumentId(@Param("documentId") Long documentId);
 }
