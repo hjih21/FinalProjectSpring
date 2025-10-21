@@ -115,6 +115,14 @@ public class QuestionService {
             throw new IllegalStateException("질문 JSON 파싱 실패", e);
         }
     }
+    //score
+    public Object getLatestQuestionTextByDocument(int documentId) {
+        return questionMapper.selectQuestionTextByDocumentId(documentId);
+    }
+
+    public Integer getLatestQuestionIdByDocument(int documentId) {
+        return questionMapper.selectLatestQuestionIdByDocumentId(documentId);
+    }
     }
 
 

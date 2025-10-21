@@ -10,4 +10,5 @@ public interface AnswerMapper {
     int insertAnswer(@Param("a") Answer answer);
 
     Long findLatestQuestionIdByDocumentId(@Param("documentId") Long documentId);
+    Object selectAnswerTextById(@Param("answerId") int answerId);
 }

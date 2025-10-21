@@ -66,4 +66,9 @@ public class AnswerService {
             }
         }
     }
+
+    //score
+    public Object getAnswerTextById(int answerId) {
+        return answerMapper.selectAnswerTextById(answerId);
+    }
 }

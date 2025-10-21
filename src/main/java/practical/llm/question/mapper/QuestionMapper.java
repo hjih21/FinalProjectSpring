@@ -26,4 +26,8 @@ public interface QuestionMapper {
     // 문서에 여러 row를 저장하던 과거 로직을 쓰지 않는다면 제거 가능
     List<Question> findByDocumentId(@Param("documentId") Long documentId);
     List<Question> findByUserId(@Param("userId") Long userId);
+
+    //score
+    Object  selectQuestionTextByDocumentId(@Param("documentId") int documentId);
+    Integer selectLatestQuestionIdByDocumentId(@Param("documentId") int documentId);
 }

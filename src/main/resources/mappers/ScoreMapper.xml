@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="practical.llm.score.mapper.ScoreMapper">
+    <insert id="insertScore"
+            parameterType="practical.llm.score.dto.ScoreInsertParam"
+            useGeneratedKeys="true"
+            keyProperty="scoreId">
+        INSERT INTO tb_score
+        ( question_id
+        , eval_model_id
+        , answer_id
+        , grader_prompt_text
+        , grader_prompt_params
+        , grader_response_raw
+        , metrics_json
+        , overall_score )
+        VALUES
+        ( #{questionId}
+        , #{evalModelId}
+        , #{answerId}
+        , #{graderPromptText}
+        , CAST(COALESCE(#{graderPromptParamsJson,jdbcType=LONGVARCHAR}, '{}') AS JSON)
+        , CAST(COALESCE(#{graderResponseRawJson,jdbcType=LONGVARCHAR}, '{}') AS JSON)
+        , CAST(COALESCE(#{metricsJson,jdbcType=LONGVARCHAR}, '{}') AS JSON)
+        , #{overallScore} )
+    </insert>
+</mapper>

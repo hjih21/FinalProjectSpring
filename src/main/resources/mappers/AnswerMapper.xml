@@ -26,4 +26,12 @@
             LIMIT 1
     </select>
 
+    <!--score-->
+    <select id="selectAnswerTextById" parameterType="int" resultType="java.lang.Object">
+        SELECT answer_text
+        FROM tb_answer
+        WHERE answer_id = #{answerId}
+            LIMIT 1
+    </select>
+
 </mapper>
